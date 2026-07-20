@@ -1,6 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class ResumeResponseModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     ats_score:int
     name:str
     mobile_no:str
@@ -10,6 +12,8 @@ class ResumeResponseModel(BaseModel):
     best_project:str
 
 class ResumeCompareModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     match_score:int
     matched_skills:list[str]|None=None
     missing_skills:list[str]|None=None
