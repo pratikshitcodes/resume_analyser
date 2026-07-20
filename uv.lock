@@ -199,6 +199,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "groq" },
+    { name = "pydantic" },
     { name = "pypdf" },
     { name = "python-dotenv" },
 ]
@@ -206,6 +207,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "groq", specifier = ">=1.5.0" },
+    { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pypdf", specifier = ">=6.14.2" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
 ]
