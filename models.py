@@ -1,23 +1,75 @@
 from pydantic import BaseModel, ConfigDict
 
-class ResumeResponseModel(BaseModel):
+class Experience(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    ats_score:int
+    company:str
+    duration:str
+    role:str
+    description:str|None=None
+
+class Education(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    degree:str
+    university:str
+    cgpa:float|None=None
+
+class Project(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     name:str
-    mobile_no:str
+    description:str
+    technologies:list[str]
+    link:str|None=None
+
+class ResumeModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name:str
+    phone:str
     email:str
-    leetcode_profile:str|None=None
-    skills:list[str]|None=None
-    best_project:str
+
+    linkedin:str|None=None
+    leetcode:str|None=None
+    github:str|None=None
+
+    skills:list[str]=[]
+    education:list[Education]
+    experience:list[Experience]=[]
+    projects:list[Project]=[]
+
+    achievements:list[str]=[]
+
+class JobDescriptionModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    company:str
+    role:str
+
+    required_skills:list[str]=[]
+    preferred_skills: list[str] = []
+    qualifications:list[str]=[]
+    responsibilities:list[str]=[]
+
+    experience_required:str|None=None
+
 
 class ResumeCompareModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    candidate_name:str
+
     match_score:int
-    matched_skills:list[str]|None=None
-    missing_skills:list[str]|None=None
-    strengths:list[str]|None=None
-    weakness:list[str]|None=None
+
+    matched_skills:list[str]=[]
+
+    missing_skills:list[str]=[]
+
+    strengths:list[str]=[]
+    
+    weakness:list[str]=[]
+    
     suggestions:str
+    
     best_project:str

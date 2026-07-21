@@ -1,7 +1,15 @@
-def create_resume_prompt(text: str, schema: dict) -> str:
-    prompt = f"""
-        You are an ATS resume evaluator Out of 100.
+matcher_system_prompt="""You are an expert ATS  resume evaluator.
 
+        Your task is to compare a structured resume against a structured job description and produce an accurate evaluation.
+
+        Be objective.
+        Do not hallucinate.
+        Return only valid JSON."""
+parse_system_prompt="""
+You are an information extraction assistant.
+"""
+def create_resume_prompt(text: str, schema_str:str) -> str:
+    prompt = f"""
         Below is the extracted text from a resume.
 
         <resume>
@@ -10,37 +18,61 @@ def create_resume_prompt(text: str, schema: dict) -> str:
 
         </resume>
 
-        Analyze it according to the schema.
-        Select the strongest project based on industry relevance and technical depth.
-        Summarize it in one sentence.
-        Explain why it is the strongest project in 1 line.
+        Extract the essential information from the resume about the candidate according to this schema.{schema_str}
         Return ONLY valid JSON.
         Do not include markdown.
+    """
+    return prompt
+
+def create_jd_prompt(text: str, schema_str:str) -> str:
+    prompt = f"""
+        Below is the extracted text from a job_description.
+
+        <job_description>
+
+        {text}
+
+        </job_description>
+
         The response MUST follow this schema:
-        {schema}
+        {schema_str}
+        Return ONLY valid JSON.
+        Do not include markdown.
     """
     return prompt
 
 
 def create_match_prompt(resume_text: str, job_description: str, schema_str: str) -> str:
-    return f"""
-        You are an ATS Resume Matching API.
+     return f"""
+        You are an expert ATS Resume Evaluator.
 
-        Given the resume of the candidate.
-        <resume>
+        You are given:
+
+        1. A structured resume.
+        2. A structured job description.
+
+        Your task:
+
+        - Compare the resume against the job description.
+        - Calculate a realistic ATS match score from 0-100.
+        - List all matching skills.
+        - List all missing skills.
+        - Identify the candidate's strengths.
+        - Identify weaknesses relative to the job.
+        - Give practical suggestions to improve the resume for this role.
+        - Select the strongest project relevant to the job.
+
+        Do NOT leave any field empty unless the information truly does not exist.
+
+        Resume:
         {resume_text}
-        </resume>
 
-        Given the job description for the position.
+        Job Description:
         {job_description}
 
-        Compare the resume against the job description.
-
         Return ONLY valid JSON.
-        Do not explain.
-        Do not use markdown.
-        Do not wrap in ```.
 
-        The response MUST follow this schema:
+        The JSON MUST follow this schema:
+
         {schema_str}
-    """
+        """
