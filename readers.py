@@ -7,7 +7,6 @@ def read_pdf(path:str)-> str:
     text=""
     for page in reader.pages:
         text+=(page.extract_text() or "")+"\n\n"
-    print(text)
     return text
 
 def read_docx(path:str)->str:
@@ -31,4 +30,4 @@ def extract_text(path:str)->str:
     }
     if suffix not in READERS:
         raise ValueError(f"{suffix} is Invalid file type for resume.Only PDF and DOCX are supported.")
-    
+    return READERS[suffix](path)
