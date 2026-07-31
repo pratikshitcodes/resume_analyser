@@ -43,7 +43,7 @@ def create_jd_prompt(text: str, schema_str:str) -> str:
 
 
 def create_match_prompt(resume_text: str, job_description: str, schema_str: str) -> str:
-     return f"""
+    return f"""
         You are an expert ATS Resume Evaluator.
 
         You are given:
@@ -52,9 +52,10 @@ def create_match_prompt(resume_text: str, job_description: str, schema_str: str)
         2. A structured job description.
 
         Your task:
-
+        -Dont be too strict while giving the ATS score.
         - Compare the resume against the job description.
         - Calculate a realistic ATS match score from 0-100.
+        - Dont fill the decision field.
         - List all matching skills.
         - List all missing skills.
         - Identify the candidate's strengths.

@@ -62,6 +62,8 @@ class ResumeCompareModel(BaseModel):
 
     match_score:int
 
+    decision:str
+
     matched_skills:list[str]=[]
 
     missing_skills:list[str]=[]

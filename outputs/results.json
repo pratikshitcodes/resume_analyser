@@ -1,0 +1,124 @@
+{
+    "metadata": {
+        "company": "Fundwave",
+        "role": "Full Stack Engineer Intern",
+        "total_candidates": 3,
+        "shortlisted": 0,
+        "maybe": 3,
+        "rejected": 0,
+        "highest_score": 68,
+        "lowest_score": 60,
+        "average_score": 65.0,
+        "generated_at": "2026-07-31T13:37:11.070799",
+        "generator": "Resume Evaluator v1.0"
+    },
+    "results": [
+        {
+            "candidate_name": "Pratikshit Singh",
+            "match_score": 68,
+            "decision": "Maybe",
+            "matched_skills": [
+                "JavaScript",
+                "SQL (PostgreSQL)",
+                "Back-end programming (FastAPI)",
+                "Semantic HTML",
+                "CSS",
+                "Git"
+            ],
+            "missing_skills": [
+                "Responsive design",
+                "Understanding of core web and browser concepts",
+                "Bash/Linux shell"
+            ],
+            "strengths": [
+                "Full\u2011stack development experience with FastAPI and PostgreSQL",
+                "Implemented 15+ RESTful APIs and JWT authentication",
+                "Strong JavaScript, HTML, and CSS skills demonstrated in projects",
+                "Proficient with Git version control",
+                "Solid algorithmic foundation (600+ DSA problems solved)",
+                "B.Tech in Information Technology with 8.15 CGPA"
+            ],
+            "weakness": [
+                "No professional internship or real\u2011world engineering experience",
+                "Limited exposure to responsive design and CSS frameworks",
+                "No Bash/Linux shell scripting experience",
+                "No experience with cloud platforms (AWS/GCP)",
+                "Not familiar with modern JavaScript frameworks such as React, Angular, or Vue",
+                "Lacks automated testing experience"
+            ],
+            "suggestions": "Add any internship or real\u2011world project experience to demonstrate exposure to a professional engineering environment. Highlight responsive design work from the Portfolio project and explicitly mention use of media queries or CSS frameworks. Include familiarity with Bash/Linux commands, even at a basic level. Acquire and showcase a cloud certification or simple AWS/GCP deployment for the Budgetify app. Learn a modern JS framework (e.g., React) and add a related component to the portfolio. Mention any automated testing (unit/integration) you have performed. Provide a GitHub link with code samples and emphasize collaboration with designers or product managers if applicable.",
+            "best_project": "Budgetify - Personal Finance Analytics Platform"
+        },
+        {
+            "candidate_name": "PRIYANSHU SINGH",
+            "match_score": 67,
+            "decision": "Maybe",
+            "matched_skills": [
+                "JavaScript",
+                "Java",
+                "SQL",
+                "Node.js",
+                "Express.js",
+                "HTML5",
+                "CSS3",
+                "Git"
+            ],
+            "missing_skills": [
+                "Responsive design",
+                "Understanding of core web and browser concepts",
+                "Bash/Linux shell"
+            ],
+            "strengths": [
+                "Full\u2011stack development experience with Node.js, Express, React and Redux Toolkit",
+                "Implemented JWT based authentication and role\u2011based access",
+                "Worked with both SQL (MySQL) and NoSQL (MongoDB) databases",
+                "Strong problem\u2011solving practice (80+ coding questions solved)",
+                "Version control proficiency with Git/GitHub"
+            ],
+            "weakness": [
+                "No prior professional internship or real\u2011world engineering experience",
+                "Lacks explicit experience with responsive design and core browser concepts",
+                "No exposure to Bash/Linux shell scripting",
+                "Missing cloud platform knowledge (AWS/GCP) and automated testing experience",
+                "No background in Java frameworks or accounting/finance domain"
+            ],
+            "suggestions": "Add any internship or collaborative project that demonstrates real\u2011world engineering experience. Highlight responsive design work (e.g., media queries, mobile\u2011first layouts) in your LMS project or create a new responsive UI showcase. Mention any Bash/Linux usage you have (even for local development). Include brief notes on testing (unit/integration) and any exposure to cloud services such as AWS or GCP. Expand the GitHub section with a link to the LMS repository and consider adding a README that outlines architecture, deployment steps, and testing strategy. Finally, tailor the resume summary to emphasize ability to work with product managers and multicultural teams.",
+            "best_project": "FULL STACK LEARNING MANAGEMENT SYSTEM"
+        },
+        {
+            "candidate_name": "Anshit Verma",
+            "match_score": 60,
+            "decision": "Maybe",
+            "matched_skills": [
+                "JavaScript",
+                "CSS",
+                "HTML5",
+                "mySql",
+                "Bootstrap"
+            ],
+            "missing_skills": [
+                "Back-end programming",
+                "Bash/Linux shell",
+                "Git (professional use)",
+                "Responsive design (explicit)",
+                "Understanding of core web and browser concepts"
+            ],
+            "strengths": [
+                "Leadership experience as Team Lead",
+                "Strong problem\u2011solving and critical thinking abilities",
+                "Teamwork and collaboration skills",
+                "Adaptability and time\u2011management",
+                "Exposure to Machine Learning, Neural Networks, Data Science"
+            ],
+            "weakness": [
+                "No documented professional internship or real\u2011world engineering experience",
+                "Limited back\u2011end development exposure (Python listed as basic only)",
+                "Absent version\u2011control (Git) and shell scripting (Bash) experience",
+                "No explicit responsive design or core web concepts demonstrated",
+                "Projects and achievements section is empty"
+            ],
+            "suggestions": "Add a projects section that showcases full\u2011stack work, highlighting use of JavaScript, HTML/CSS, and a back\u2011end language (e.g., Node.js, Python, or Java). Include concrete examples of database design (SQL/MySQL) and API development. Mention any use of Git for source control and Bash scripting for automation. If you have used Bootstrap or other frameworks for responsive design, explicitly state it. Consider contributing to open\u2011source or building a personal web app to demonstrate real\u2011world experience. Update the resume with quantifiable achievements from your team\u2011lead and coordination roles, and add links to a GitHub profile or deployed projects.",
+            "best_project": "No projects provided in the resume"
+        }
+    ]
+}
