@@ -1,8 +1,9 @@
 import json
-from parser import parse_resume,parse_jd
-from matcher import compare_resume
+from week1.resume_evaluator.app.services.parser import parse_resume,parse_jd
+from ..services.matcher import compare_resume
 from pathlib import Path
 import csv
+from week1.resume_evaluator.app.schemas.models import Profiles
 from datetime import datetime
 def export_json(results):
     with open("outputs/results.json","w") as f:
@@ -21,7 +22,7 @@ def export_csv(results):
             output_writer.writerow(result)
 
 def main():
-    jd=parse_jd("JD Full Stack Intern - 2026.pdf")
+    jd,links=parse_jd("JD Full Stack Intern - 2026.pdf")
     jd_dict=jd.model_dump()
     folder=Path("resumes")
     results=[]
@@ -33,7 +34,8 @@ def main():
     accumulated_score=0
     total_candidates=0
     for resume_path in folder.iterdir():
-        resume=parse_resume(resume_path)
+        resume,links=parse_resume(resume_path)
+        print(links)
         res=compare_resume(resume,jd)
 
         highest_score=max(highest_score,res.match_score)
@@ -41,6 +43,7 @@ def main():
         lowest_score=min(lowest_score,res.match_score)
 
         accumulated_score+=res.match_score
+
         if res.match_score>=80:
             res.decision="Shortlist"
             shortlisted+=1
@@ -51,7 +54,32 @@ def main():
             res.decision="Reject"
             rejected+=1
         total_candidates+=1
+
+        profiles={
+            "project_links":[]
+        }
+        for link in links:
+            link=link.lower()
+
+            if link.startswith("mailto:"):
+                profiles["email"]=link.replace("mailto:","")
+            elif "linkedin.com" in link:
+                profiles["linkedin"]=link
+            elif "leetcode.com" in link:
+                profiles["leetcode"]=link
+            elif "geeksforgeeks.org" in link:
+                profiles["geeksforgeeks"]=link
+            elif "github.com" in link:
+                path=link.replace("https://github.com/","").strip("/")
+                if path.count("/")==0:
+                    profiles["github"]=link
+                else:
+                    profiles["project_links"].append(link)
+
+        res.profiles=Profiles(**profiles)
         results.append(res)
+        
+
     results.sort(key=lambda x:x.match_score,reverse=True)
     metadata={
         "company":jd_dict["company"],

@@ -1,8 +1,8 @@
-from models import ResumeCompareModel,ResumeModel,JobDescriptionModel
-from prompts import create_match_prompt,matcher_system_prompt
+from app.schemas.models import ResumeCompareModel,ResumeModel,JobDescriptionModel
+from app.prompts.compare_prompts import create_match_prompt,matcher_system_prompt
 import json
-from llm import generate_with_llm
-from config import client,model,response_format
+from app.services.llm import generate_with_llm
+from app.config import client,model,response_format
 
 def compare_resume(resume:ResumeModel,jd:JobDescriptionModel)->ResumeCompareModel:
     schema=ResumeCompareModel.model_json_schema()

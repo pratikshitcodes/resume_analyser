@@ -54,12 +54,21 @@ class JobDescriptionModel(BaseModel):
 
     experience_required:str|None=None
 
+class Profiles(BaseModel):
+    email:str|None=None
+    linkedin:str|None=None
+    github:str|None=None
+    leetcode:str|None=None
+    geeksforgeeks:str|None=None
+    project_links:list[str]=[]
 
 class ResumeCompareModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     candidate_name:str
 
+    profiles:Profiles
+    
     match_score:int
 
     decision:str

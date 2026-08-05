@@ -52,8 +52,19 @@ def create_match_prompt(resume_text: str, job_description: str, schema_str: str)
         2. A structured job description.
 
         Your task:
-        -Dont be too strict while giving the ATS score.
-        - Compare the resume against the job description.
+
+        - Compare the candidate's resume with the provided job description.
+        - Give a realistic ATS score. Do not be overly strict; a good candidate with relevant skills and projects should receive a fair score.
+        - Give additional credit if the candidate has:
+        - GitHub projects
+        - A portfolio website
+        - LinkedIn profile
+        - LeetCode or GeeksforGeeks profiles
+        - Well-documented personal projects
+        - Consider strong personal projects as valuable practical experience, especially if they demonstrate real-world problem solving, deployment, or significant technical complexity.
+        - Focus on the candidate's demonstrated skills and potential rather than only professional work experience.
+        - Do not invent information that is not present in the resume.
+        - Base your evaluation only on the resume and the job description.
         - Calculate a realistic ATS match score from 0-100.
         - Dont fill the decision field.
         - List all matching skills.
