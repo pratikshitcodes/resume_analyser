@@ -20,10 +20,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Setup CORS
+# Setup CORS (Supports Localhost, Vercel deployments, and custom domains)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com|http://localhost:.*|http://127\.0\.0\.1:.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,6 +1,20 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+// Resolve Backend API URL dynamically
+const getBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    const clean = envUrl.replace(/\/+$/, '');
+    return clean.endsWith('/api/v1') ? clean : `${clean}/api/v1`;
+  }
+  // In development fallback to localhost, in production fallback to deployed Render backend
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://talentplus-ai.onrender.com/api/v1';
+  }
+  return 'http://127.0.0.1:8000/api/v1';
+};
+
+const API_BASE_URL = getBaseUrl();
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
