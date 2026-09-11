@@ -1,1 +1,99 @@
-[]
+{
+    "metadata": {
+        "company": "Fundwave",
+        "role": "Full Stack Engineer Intern",
+        "total_candidates": 2,
+        "shortlisted": 0,
+        "maybe": 1,
+        "rejected": 1,
+        "highest_score": 70,
+        "lowest_score": 40,
+        "average_score": 55.0,
+        "generated_at": "2026-08-15T16:19:04.348515",
+        "generator": "Resume Evaluator v1.0"
+    },
+    "results": [
+        {
+            "candidate_name": "Priyanshu Singh",
+            "profiles": {
+                "email": null,
+                "linkedin": null,
+                "github": null,
+                "leetcode": null,
+                "geeksforgeeks": null,
+                "project_links": [
+                    "https://github.com/codepriyanshu2004/lms-frontend"
+                ]
+            },
+            "match_score": 70,
+            "decision": "Maybe",
+            "matched_skills": [
+                "JavaScript",
+                "Databases (SQL or NoSQL)",
+                "Back-end programming",
+                "Semantic HTML, CSS, Wireframes, and responsive design",
+                "Git"
+            ],
+            "missing_skills": [
+                "Bash / Linux shell",
+                "AWS or GCP",
+                "Java frameworks such as Spring, JPA / Hibernate",
+                "Automated tests",
+                "Chef experience"
+            ],
+            "strengths": [
+                "Strong understanding of full-stack development",
+                "Experience with React and Node.js",
+                "Good problem-solving skills as demonstrated by 80+ questions solved"
+            ],
+            "weakness": [
+                "No prior technical internship experience",
+                "Lack of experience with Bash/Linux shell and cloud platforms like AWS or GCP",
+                "No LeetCode or GeeksforGeeks profiles"
+            ],
+            "suggestions": "Include more details about prior projects, consider adding a personal GitHub page to showcase coding skills, and highlight any transferable skills gained from non-technical experiences.",
+            "best_project": "FULL STACK LEARNING MANAGEMENT SYSTEM"
+        },
+        {
+            "candidate_name": "Anshit Verma",
+            "profiles": {
+                "email": null,
+                "linkedin": null,
+                "github": null,
+                "leetcode": null,
+                "geeksforgeeks": null,
+                "project_links": []
+            },
+            "match_score": 40,
+            "decision": "Reject",
+            "matched_skills": [
+                "JavaScript",
+                "HTML5",
+                "CSS"
+            ],
+            "missing_skills": [
+                "Bash / Linux shell",
+                "Git",
+                "Databases (SQL or NoSQL)",
+                "Back-end programming",
+                "Semantic HTML, Wireframes, and responsive design",
+                "AWS or GCP",
+                "Java frameworks such as Spring, JPA / Hibernate",
+                "ES6 and JS frameworks such as ReactJS, Angular 4+, Vue, LitElement",
+                "Automated tests",
+                "Chef experience"
+            ],
+            "strengths": [
+                "Good educational background with a Master of Computer Application degree",
+                "Relevant technical skills such as JavaScript, HTML5, and CSS"
+            ],
+            "weakness": [
+                "Lack of professional experience as a Full Stack Engineer",
+                "No personal projects or GitHub presence",
+                "Insufficient information about experience and achievements"
+            ],
+            "suggestions": "Add personal projects, create a GitHub profile, and include more details about experience and achievements to strengthen the resume.",
+            "best_project": "Not Applicable"
+        }
+    ]
+}

@@ -5,8 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi>=0.141.1",
-    "fitz>=0.0.1.dev2",
+    "fastapi[standard]>=0.141.1",
     "groq>=1.5.0",
     "pydantic>=2.13.4",
     "pymupdf>=1.28.0",

@@ -1,0 +1,32 @@
+Company Name: Microsoft
+Job Title: Software Engineer Intern
+Job Description:
+Come build community, explore your passions and do your best work at Microsoft with thousands of University interns from every corner of the world. This opportunity will allow you to bring your aspirations, talent, potential—and excitement for the journey ahead.  
+
+As a Software Engineering Intern, you will work with teammates to solve problems and build innovative software solutions. You will apply your passion for customers and product quality as you provide technical guidance to Technical Program Managers and Product Managers. You will learn and adopt relevant new technologies, tools, methods, and processes to leverage in your solutions. This opportunity will enable you to advance your career by designing, developing, and testing next-generation software that will empower every person and organization on the planet to achieve more.
+
+Required Skills:
+- C++
+- Python
+- Data Structures and Algorithms (DSA)
+- Object-Oriented Programming (OOP)
+- Database Management Systems (PostgreSQL / SQL)
+
+Preferred Skills:
+- FastAPI
+- REST APIs
+- JavaScript
+- GitHub / Version Control
+- Web Development (HTML/CSS)
+-RAG
+
+Sub Category: Tech
+Place of posting: India, Multiple Location
+CGPA Criteria: 7
+Branches: CSE (BTech), CSDS (BTech), CSAI (BTech), CSDA (BTech), CIOT (BTech), MAC (BTech), IT (BTech), ITNS (BTech), GI (BTech)
+CTC/Stipend: 1.25LPM, CTC to be revealed later
+Backlogs: 0
+Duration (Applicable for internship only): 2 Months
+Point of Contact:
+Anju- 8700983484
+praket- 8527139749

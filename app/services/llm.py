@@ -27,7 +27,7 @@ def generate_with_llm(client:Groq,model:str,prompt:str,SYSTEM_PROMT:str,response
         raise ValueError("LLM returned invalid JSON") from e
     except ValidationError as e:
         raise ValueError(
-        f"LLM response does not match {output_model.__name__} schema."
+        f"LLM response does not match {output_model.__name__} schema.\n{e}"
     ) from e
     
     return result

@@ -1,0 +1,6 @@
+Sarah Connor
+sarah@connor.dev | +1 555-0129 | github.com/sconnor
+Summary: 5+ years backend engineer expert in Python, FastAPI, PostgreSQL, and Docker.
+Experience: Senior Backend Developer at CyberTech (2021-Present).
+Skills: Python, FastAPI, PostgreSQL, Docker, Kubernetes, Redis, Celery.
+Projects: Automated Trading Engine (FastAPI/Redis) handling 20,000 req/sec.

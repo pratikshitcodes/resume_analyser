@@ -1,0 +1,6 @@
+Elena Rostova
+elena@codecraft.io
+Summary: Recent CS graduate with passion for web development and modern stacks.
+Education: B.S. in Computer Science (2024).
+Skills: JavaScript, HTML, CSS, React, basic Python.
+Projects: Portfolio website and simple task manager.

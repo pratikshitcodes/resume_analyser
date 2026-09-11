@@ -5,18 +5,27 @@ import fitz
 from fastapi import UploadFile
 
 def read_pdf(path:str)-> tuple[str,list[str]]:
-    reader=PdfReader(path)
     text=""
-    doc = fitz.open(path)
     links = []
 
-    for page in doc:
-        for link in page.get_links():
-            if "uri" in link:
-                links.append(link["uri"])
+    try:
+        with fitz.open(path) as doc:
+            for page in doc:
+                text += page.get_text() + "\n\n"
+                for link in page.get_links():
+                    if "uri" in link:
+                        links.append(link["uri"])
+    except Exception as e:
+        print(f"PyMuPDF error: {e}")
+    
+    if not text.strip():
+        try:
+            reader=PdfReader(path)
+            for page in reader.pages:
+                text+=(page.extract_text() or "")+"\n\n"
+        except Exception as e:
+            print(f"pypdf error: {e}")
 
-    for page in reader.pages:
-        text+=(page.extract_text() or "")+"\n\n"
     return text,links
 
 def read_docx(path:str)->tuple[str,list[str]]:
@@ -39,10 +48,12 @@ def extract_text(path:str)->tuple[str,list[str]]:
     
     suffix=Path(path).suffix.lower()
 
-    READERS = {
-        ".pdf": read_pdf,
-        ".docx": read_docx,
-    }
-    if suffix not in READERS:
-        raise ValueError(f"{suffix} is Invalid file type for resume.Only PDF and DOCX are supported.")
-    return READERS[suffix](path)
+    if path.endswith(".pdf"):
+        return read_pdf(path)
+    elif path.endswith(".docx"):
+        return read_docx(path)
+    elif path.endswith(".txt"):
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read(), []
+    else:
+        raise ValueError(f"Unsupported file format for {path}")

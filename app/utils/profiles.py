@@ -15,7 +15,7 @@ def extract_links(links):
         elif "geeksforgeeks.org" in link:
             profiles["geeksforgeeks"]=link
         elif "github.com" in link:
-            path=link.replace("https://github.com/","").strip("/")
+            path=link.replace("https://github.com/","").replace("http://github.com/","").strip("/")
             if path.count("/")==0:
                 profiles["github"]=link
             else:

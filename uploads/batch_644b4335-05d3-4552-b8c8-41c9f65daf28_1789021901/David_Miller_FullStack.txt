@@ -1,0 +1,6 @@
+David Miller
+david.miller@example.com | github.com/dmiller
+Summary: 3 years building web apps in React, TypeScript, Python, and PostgreSQL.
+Experience: Full Stack Engineer at WebFlow Dynamics (2023-Present).
+Skills: Python, React, TypeScript, FastAPI, PostgreSQL, Tailwind CSS, Git.
+Projects: AI Video Revisor and Search Portal with React and FastAPI.
