@@ -28,7 +28,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       if (isRegisterMode) {
         await register(email, password, fullName, role);
       } else {
-        await login(email, password, role);
+        await login(email, password);
       }
       onClose();
     } catch (err: any) {
@@ -43,7 +43,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setError(null);
     const demoEmail = demoRole === 'recruiter' ? 'recruiter_demo@company.com' : 'candidate_demo@example.com';
     try {
-      await login(demoEmail, 'securepassword123', demoRole);
+      await login(demoEmail, 'securepassword123');
       onClose();
     } catch (err: any) {
       setError('Could not log in demo account.');
@@ -79,31 +79,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </p>
         </div>
 
-        {/* Quick Demo Logins */}
-        <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block text-center">
-            Quick 1-Click Demo Profiles
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('candidate')}
-              disabled={loading}
-              className="flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition-colors"
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>Candidate Demo</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemo('recruiter')}
-              disabled={loading}
-              className="flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition-colors"
-            >
-              <Briefcase className="w-3.5 h-3.5" />
-              <span>Recruiter Demo</span>
-            </button>
-          </div>
+        {/* Mode Switch Tabs */}
+        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button
+            type="button"
+            onClick={() => { setIsRegisterMode(false); setError(null); }}
+            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-colors ${
+              !isRegisterMode
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => { setIsRegisterMode(true); setError(null); }}
+            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-colors ${
+              isRegisterMode
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Create Account
+          </button>
         </div>
 
         {error && (
@@ -125,14 +124,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Jane Doe"
+                    placeholder="e.g. Ritik Singh"
                     className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-slate-400 font-medium block mb-1">Select Role</label>
+                <label className="text-slate-400 font-medium block mb-1">Account Role</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -170,7 +169,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@company.com"
+                placeholder="you@company.com"
                 className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500"
               />
             </div>
@@ -196,18 +195,35 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             disabled={loading}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
           >
-            {loading ? 'Authenticating...' : isRegisterMode ? 'Create Account' : 'Sign In'}
+            {loading ? 'Processing...' : isRegisterMode ? 'Create Private Account' : 'Sign In'}
           </button>
         </form>
 
-        {/* Toggle Mode */}
-        <div className="text-center pt-2">
-          <button
-            onClick={() => { setIsRegisterMode(!isRegisterMode); setError(null); }}
-            className="text-xs text-indigo-400 hover:underline"
-          >
-            {isRegisterMode ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-          </button>
+        {/* Quick Demo Logins Note */}
+        <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800/80 space-y-2 text-center">
+          <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
+            Or test with 1-click demo profiles
+          </span>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleQuickDemo('candidate')}
+              disabled={loading}
+              className="flex items-center justify-center space-x-1.5 py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-slate-800 text-xs font-medium transition-colors"
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Candidate Demo</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickDemo('recruiter')}
+              disabled={loading}
+              className="flex items-center justify-center space-x-1.5 py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-300 border border-slate-800 text-xs font-medium transition-colors"
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>Recruiter Demo</span>
+            </button>
+          </div>
         </div>
 
       </div>

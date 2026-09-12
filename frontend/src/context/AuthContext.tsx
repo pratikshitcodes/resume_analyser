@@ -7,7 +7,7 @@ interface AuthContextType {
   role: 'candidate' | 'recruiter';
   token: string | null;
   isLoading: boolean;
-  login: (email: string, password?: string, defaultRole?: 'candidate' | 'recruiter') => Promise<void>;
+  login: (email: string, password?: string) => Promise<void>;
   register: (email: string, password?: string, fullName?: string, role?: 'candidate' | 'recruiter') => Promise<void>;
   switchRole: (newRole: 'candidate' | 'recruiter') => void;
   logout: () => void;
@@ -24,6 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       const savedToken = localStorage.getItem('access_token');
+      const savedRefreshToken = localStorage.getItem('refresh_token');
       const savedRole = (localStorage.getItem('app_role') as 'candidate' | 'recruiter') || 'candidate';
       setRole(savedRole);
 
@@ -33,45 +34,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(res.data);
           setRole(res.data.role === 'recruiter' ? 'recruiter' : 'candidate');
         } catch (err) {
-          console.error('Session expired or invalid token', err);
-          localStorage.removeItem('access_token');
-          setToken(null);
+          // Access token might be expired, try refreshing using refresh_token
+          if (savedRefreshToken) {
+            try {
+              const refreshRes = await api.refreshToken(savedRefreshToken);
+              const { access_token, refresh_token: newRefreshToken, role: userRole } = refreshRes.data;
+              localStorage.setItem('access_token', access_token);
+              if (newRefreshToken) localStorage.setItem('refresh_token', newRefreshToken);
+              setToken(access_token);
+              setRole(userRole === 'recruiter' ? 'recruiter' : 'candidate');
+              const meRes = await api.getMe();
+              setUser(meRes.data);
+            } catch (refreshErr) {
+              console.error('Session expired. Please sign in again.', refreshErr);
+              logout();
+            }
+          } else {
+            logout();
+          }
+        }
+      } else if (savedRefreshToken) {
+        // Only refresh token exists, attempt auto-refresh
+        try {
+          const refreshRes = await api.refreshToken(savedRefreshToken);
+          const { access_token, refresh_token: newRefreshToken, role: userRole } = refreshRes.data;
+          localStorage.setItem('access_token', access_token);
+          if (newRefreshToken) localStorage.setItem('refresh_token', newRefreshToken);
+          setToken(access_token);
+          setRole(userRole === 'recruiter' ? 'recruiter' : 'candidate');
+          const meRes = await api.getMe();
+          setUser(meRes.data);
+        } catch (e) {
+          logout();
         }
       }
       setIsLoading(false);
     };
+
+    const handleAuthLogout = () => {
+      logout();
+    };
+    window.addEventListener('auth:logout', handleAuthLogout);
+
     initAuth();
+
+    return () => {
+      window.removeEventListener('auth:logout', handleAuthLogout);
+    };
   }, []);
 
-  const login = async (email: string, password = 'securepassword123', defaultRole: 'candidate' | 'recruiter' = 'candidate') => {
-    try {
-      const res = await api.login({ email, password });
-      const { access_token, role: userRole } = res.data;
-      localStorage.setItem('access_token', access_token);
-      localStorage.setItem('app_role', userRole);
-      setToken(access_token);
-      setRole(userRole === 'recruiter' ? 'recruiter' : 'candidate');
-      const me = await api.getMe();
-      setUser(me.data);
-    } catch (err) {
-      try {
-        const regRes = await api.register({
-          email,
-          password,
-          full_name: email.split('@')[0].toUpperCase(),
-          role: defaultRole
-        });
-        const { access_token, role: userRole } = regRes.data;
-        localStorage.setItem('access_token', access_token);
-        localStorage.setItem('app_role', userRole);
-        setToken(access_token);
-        setRole(userRole === 'recruiter' ? 'recruiter' : 'candidate');
-        const me = await api.getMe();
-        setUser(me.data);
-      } catch (regErr) {
-        throw regErr;
-      }
+  const login = async (email: string, password = 'securepassword123') => {
+    const res = await api.login({ email, password });
+    const { access_token, refresh_token, role: userRole } = res.data;
+    localStorage.setItem('access_token', access_token);
+    if (refresh_token) {
+      localStorage.setItem('refresh_token', refresh_token);
     }
+    localStorage.setItem('app_role', userRole);
+    setToken(access_token);
+    setRole(userRole === 'recruiter' ? 'recruiter' : 'candidate');
+    const me = await api.getMe();
+    setUser(me.data);
   };
 
   const register = async (email: string, password = 'securepassword123', fullName = 'User', regRole: 'candidate' | 'recruiter' = 'candidate') => {
@@ -81,8 +104,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       full_name: fullName,
       role: regRole
     });
-    const { access_token, role: userRole } = res.data;
+    const { access_token, refresh_token, role: userRole } = res.data;
     localStorage.setItem('access_token', access_token);
+    if (refresh_token) {
+      localStorage.setItem('refresh_token', refresh_token);
+    }
     localStorage.setItem('app_role', userRole);
     setToken(access_token);
     setRole(userRole === 'recruiter' ? 'recruiter' : 'candidate');
@@ -90,19 +116,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(me.data);
   };
 
-  const switchRole = async (newRole: 'candidate' | 'recruiter') => {
+  const switchRole = (newRole: 'candidate' | 'recruiter') => {
     setRole(newRole);
     localStorage.setItem('app_role', newRole);
-    const demoEmail = newRole === 'recruiter' ? 'recruiter_demo@company.com' : 'candidate_demo@example.com';
-    try {
-      await login(demoEmail, 'securepassword123', newRole);
-    } catch (e) {
-      console.warn('Switched role view', e);
-    }
   };
 
   const logout = () => {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('app_role');
     setToken(null);
     setUser(null);

@@ -21,19 +21,47 @@ def create_access_token(subject: Union[str, Any], role: str, expires_delta: time
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        # Default access token expires in 60 minutes
+        expire = datetime.now(timezone.utc) + timedelta(minutes=60)
     
     to_encode = {
         "exp": expire,
         "sub": str(subject),
-        "role": role
+        "role": role,
+        "type": "access"
     }
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+def create_refresh_token(subject: Union[str, Any], role: str, expires_delta: timedelta = None) -> str:
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        # Refresh token is valid for 7 days
+        expire = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    to_encode = {
+        "exp": expire,
+        "sub": str(subject),
+        "role": role,
+        "type": "refresh"
+    }
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 def decode_access_token(token: str) -> dict | None:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        # Allow legacy tokens without 'type' or verify type is 'access'
+        if payload.get("type") and payload.get("type") != "access":
+            return None
+        return payload
+    except Exception:
+        return None
+
+def decode_refresh_token(token: str) -> dict | None:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        if payload.get("type") != "refresh":
+            return None
         return payload
     except Exception:
         return None

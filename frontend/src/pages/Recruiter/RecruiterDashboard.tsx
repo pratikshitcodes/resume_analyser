@@ -7,7 +7,14 @@ import {
   Calendar, Send, Sparkles, RefreshCw, Quote
 } from 'lucide-react';
 
-export const RecruiterDashboard: React.FC = () => {
+import { useAuth } from '../../context/AuthContext';
+
+interface RecruiterDashboardProps {
+  onOpenAuth?: () => void;
+}
+
+export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAuth }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'jobs' | 'batch' | 'rankings' | 'search' | 'slots' | 'exports'>('rankings');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string>('');
@@ -44,8 +51,15 @@ export const RecruiterDashboard: React.FC = () => {
   const [newSlotEnd, setNewSlotEnd] = useState('');
 
   useEffect(() => {
-    loadJobs();
-  }, []);
+    if (user) {
+      loadJobs();
+    } else {
+      setJobs([]);
+      setSelectedJobId('');
+      setSelectedJob(null);
+      setRankings([]);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (selectedJobId) {
@@ -90,6 +104,10 @@ export const RecruiterDashboard: React.FC = () => {
 
   const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      onOpenAuth?.();
+      return;
+    }
     if (!newJobTitle.trim() || !newJobDescription.trim()) return;
     setIsCreatingJob(true);
 
@@ -133,6 +151,10 @@ export const RecruiterDashboard: React.FC = () => {
   };
 
   const handleBatchUpload = async () => {
+    if (!user) {
+      onOpenAuth?.();
+      return;
+    }
     if (!selectedJobId || !batchFiles || batchFiles.length === 0) return;
     setIsUploadingBatch(true);
     const formData = new FormData();
@@ -157,6 +179,10 @@ export const RecruiterDashboard: React.FC = () => {
   };
 
   const handleLoadDemoBatch = async () => {
+    if (!user) {
+      onOpenAuth?.();
+      return;
+    }
     if (!selectedJobId) return;
     setIsUploadingBatch(true);
 

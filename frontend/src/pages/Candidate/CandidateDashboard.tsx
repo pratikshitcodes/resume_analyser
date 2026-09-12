@@ -7,7 +7,14 @@ import {
   ChevronRight, Calendar, ExternalLink, RefreshCw, Star, Code2, Zap
 } from 'lucide-react';
 
-export const CandidateDashboard: React.FC = () => {
+import { useAuth } from '../../context/AuthContext';
+
+interface CandidateDashboardProps {
+  onOpenAuth?: () => void;
+}
+
+export const CandidateDashboard: React.FC<CandidateDashboardProps> = ({ onOpenAuth }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'ats' | 'chat' | 'match' | 'interview' | 'slots'>('ats');
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -38,18 +45,27 @@ export const CandidateDashboard: React.FC = () => {
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    loadLatestResume();
+    if (user) {
+      loadLatestResume();
+    } else {
+      setResumeData(null);
+      setMockSession(null);
+      setMatchResult(null);
+    }
     loadSlots();
-  }, []);
+  }, [user]);
 
   const loadLatestResume = async () => {
     try {
       const res = await api.getLatestResume();
       if (res.data) {
         setResumeData(res.data);
+      } else {
+        setResumeData(null);
       }
     } catch (err) {
       console.error('Failed to load resume', err);
+      setResumeData(null);
     }
   };
 
@@ -69,6 +85,11 @@ export const CandidateDashboard: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!user) {
+      onOpenAuth?.();
+      return;
+    }
+
     setIsUploading(true);
     setUploadError(null);
     const formData = new FormData();
@@ -86,6 +107,11 @@ export const CandidateDashboard: React.FC = () => {
   };
 
   const handleSampleResume = async () => {
+    if (!user) {
+      onOpenAuth?.();
+      return;
+    }
+
     setIsUploading(true);
     setUploadError(null);
 

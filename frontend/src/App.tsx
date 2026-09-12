@@ -15,9 +15,9 @@ const MainLayout: React.FC = () => {
       
       <main className="flex-1">
         {role === 'candidate' ? (
-          <CandidateDashboard />
+          <CandidateDashboard onOpenAuth={() => setIsAuthOpen(true)} />
         ) : (
-          <RecruiterDashboard />
+          <RecruiterDashboard onOpenAuth={() => setIsAuthOpen(true)} />
         )}
       </main>
 

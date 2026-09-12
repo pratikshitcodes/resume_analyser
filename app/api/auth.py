@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..core.database import get_db
-from ..core.security import verify_password, get_password_hash, create_access_token
+from ..core.security import (
+    verify_password, get_password_hash, create_access_token, 
+    create_refresh_token, decode_refresh_token
+)
 from ..models import User
-from ..schemas import UserCreate, UserLogin, Token, UserResponse
+from ..schemas import UserCreate, UserLogin, Token, UserResponse, RefreshTokenRequest
 from ..auth.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -27,9 +30,11 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    token = create_access_token(subject=user.id, role=user.role)
+    access_token = create_access_token(subject=user.id, role=user.role)
+    refresh_token = create_refresh_token(subject=user.id, role=user.role)
     return Token(
-        access_token=token,
+        access_token=access_token,
+        refresh_token=refresh_token,
         token_type="bearer",
         role=user.role,
         user_id=user.id,
@@ -46,9 +51,40 @@ def login(user_in: UserLogin, db: Session = Depends(get_db)):
             detail="Incorrect email or password."
         )
     
-    token = create_access_token(subject=user.id, role=user.role)
+    access_token = create_access_token(subject=user.id, role=user.role)
+    refresh_token = create_refresh_token(subject=user.id, role=user.role)
     return Token(
-        access_token=token,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        role=user.role,
+        user_id=user.id,
+        email=user.email,
+        full_name=user.full_name
+    )
+
+@router.post("/refresh", response_model=Token)
+def refresh_token_endpoint(req: RefreshTokenRequest, db: Session = Depends(get_db)):
+    payload = decode_refresh_token(req.refresh_token)
+    if not payload or not payload.get("sub"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token. Please sign in again."
+        )
+    
+    user_id = payload.get("sub")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User no longer exists."
+        )
+    
+    new_access_token = create_access_token(subject=user.id, role=user.role)
+    new_refresh_token = create_refresh_token(subject=user.id, role=user.role)
+    return Token(
+        access_token=new_access_token,
+        refresh_token=new_refresh_token,
         token_type="bearer",
         role=user.role,
         user_id=user.id,

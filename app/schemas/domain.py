@@ -15,11 +15,15 @@ class UserLogin(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
     role: str
     user_id: str
     email: str
     full_name: Optional[str] = None
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
