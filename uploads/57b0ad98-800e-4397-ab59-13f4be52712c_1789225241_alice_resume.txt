@@ -1,0 +1,17 @@
+Alice Smith
+alice@example.com | +1 (555) 019-2834 | linkedin.com/in/alicesmith | github.com/alicesmith
+
+SUMMARY:
+Results-driven Backend Engineer with 3 years experience building scalable web services with Python, FastAPI, and PostgreSQL.
+
+SKILLS:
+Python, FastAPI, PostgreSQL, Docker, Redis, Git, React, REST APIs
+
+EXPERIENCE:
+Software Engineer | Acme Tech (2023 - Present)
+- Architected and built high-performance microservices in FastAPI reducing response times by 40%.
+- Designed database schemas and managed migrations with SQLAlchemy and PostgreSQL.
+
+PROJECTS:
+AI Resume Evaluator
+- Built an automated candidate screening platform utilizing LLMs and full-stack React UI.
