@@ -351,12 +351,21 @@ def start_mock_interview(
     if q_set.get("behavioral"): all_questions.append(q_set["behavioral"][0])
     if q_set.get("follow_up"): all_questions.append(q_set["follow_up"][0])
     
+    # Fill remaining from category pools if requested more
+    for cat in ["technical", "project", "behavioral", "follow_up"]:
+        for q in q_set.get(cat, [])[1:]:
+            if q not in all_questions:
+                all_questions.append(q)
+
     if not all_questions:
         all_questions = [
             "Can you tell me about your background and a technically challenging project you built?",
             "How do you design scalable backend systems and optimize database queries?",
             "Describe a difficult technical bug you solved and what you learned."
         ]
+
+    target_count = max(1, min(req.num_questions or 3, len(all_questions)))
+    all_questions = all_questions[:target_count]
 
     session = MockInterviewSession(
         candidate_id=current_user.id,
