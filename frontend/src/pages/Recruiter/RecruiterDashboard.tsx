@@ -4,7 +4,7 @@ import type { Job, RankedCandidate, InterviewSlot, TaskStatus } from '../../type
 import { 
   Briefcase, Plus, Upload, Filter, Search, Download, 
   FileText, Users, ArrowUpDown, 
-  Calendar, Send, Sparkles, RefreshCw, Quote
+  Calendar, Send, Sparkles, RefreshCw, Quote, GitBranch
 } from 'lucide-react';
 
 import { useAuth } from '../../context/AuthContext';
@@ -15,7 +15,7 @@ interface RecruiterDashboardProps {
 
 export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAuth }) => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'jobs' | 'batch' | 'rankings' | 'search' | 'slots' | 'exports'>('rankings');
+  const [activeTab, setActiveTab] = useState<'jobs' | 'batch' | 'rankings' | 'blueprint' | 'search' | 'slots' | 'exports'>('rankings');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string>('');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -306,9 +306,10 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
       {/* Tabs Navigation */}
       <div className="flex space-x-2 border-b border-slate-800 mb-8 overflow-x-auto pb-2">
         {[
-          { id: 'rankings', label: 'Candidate Ranking Matrix', icon: ArrowUpDown },
+          { id: 'rankings', label: 'Zia Candidate Matrix', icon: ArrowUpDown },
+          { id: 'blueprint', label: 'Hiring Blueprint', icon: GitBranch },
           { id: 'batch', label: 'Batch Resume Screener', icon: Upload },
-          { id: 'search', label: 'Recruiter AI Search (NLQ)', icon: Search },
+          { id: 'search', label: 'Recruiter Copilot (NLQ)', icon: Search },
           { id: 'jobs', label: 'Job Postings & JD Creator', icon: Briefcase },
           { id: 'slots', label: 'Interview Calendar Slots', icon: Calendar },
           { id: 'exports', label: 'Export Reports', icon: Download },
@@ -332,7 +333,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
         })}
       </div>
 
-      {/* TAB 1: Candidate Ranking Matrix */}
+      {/* TAB 1: Candidate Ranking Matrix & Natasha Side Drawer (Zoho 2-Column Layout) */}
       {activeTab === 'rankings' && (
         <div className="space-y-6">
           
@@ -371,146 +372,432 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
             </div>
           </div>
 
-          {/* Controls & Filter Pills */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-slate-400" />
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Classification Filter:</span>
-              <div className="flex space-x-1.5">
-                {[
-                  { id: '', label: 'All Candidates' },
-                  { id: 'shortlist', label: 'Shortlist' },
-                  { id: 'maybe', label: 'Maybe' },
-                  { id: 'reject', label: 'Reject' },
-                ].map(f => (
+          {/* Zoho Split Grid: Left 8 Cols (Table) + Right 4 Cols (Natasha AI Assistant) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* Left 8 Columns: Candidate Table */}
+            <div className="lg:col-span-8 space-y-4">
+              
+              {/* Controls & Filter Pills */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Filter:</span>
+                  <div className="flex space-x-1.5">
+                    {[
+                      { id: '', label: 'All' },
+                      { id: 'shortlist', label: 'Shortlist' },
+                      { id: 'maybe', label: 'Maybe' },
+                      { id: 'reject', label: 'Reject' },
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        onClick={() => setFilterClassification(f.id)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                          filterClassification === f.id
+                            ? 'bg-emerald-600 text-white shadow-sm'
+                            : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 text-xs text-slate-400">
+                  <span>Screened: <b className="text-white">{rankings.length}</b></span>
                   <button
-                    key={f.id}
-                    onClick={() => setFilterClassification(f.id)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                      filterClassification === f.id
-                        ? 'bg-emerald-600 text-white shadow-sm'
-                        : 'bg-slate-800 text-slate-400 hover:text-slate-200'
-                    }`}
+                    onClick={() => selectedJobId && loadRankings(selectedJobId, filterClassification)}
+                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
                   >
-                    {f.label}
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Rankings Table */}
+              {isLoadingRankings ? (
+                <div className="text-center py-16 text-xs text-slate-500">Loading candidate matrix...</div>
+              ) : rankings.length === 0 ? (
+                <div className="text-center py-16 px-4 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/30">
+                  <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                  <h3 className="text-base font-semibold text-slate-200">No Candidates Screened Yet</h3>
+                  <p className="text-slate-400 text-xs max-w-md mx-auto mt-1 mb-4">
+                    Upload candidate resumes via the Batch Screener to generate weighted rankings and evidence-based fit analysis.
+                  </p>
+                  <button
+                    onClick={() => setActiveTab('batch')}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
+                  >
+                    Go to Batch Screener
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-xl">
+                  <table className="w-full text-left text-xs sm:text-sm">
+                    <thead className="bg-slate-950 text-slate-400 text-[11px] uppercase tracking-wider font-semibold border-b border-slate-800">
+                      <tr>
+                        <th className="py-3 px-3">Rank</th>
+                        <th className="py-3 px-3">Candidate</th>
+                        <th className="py-3 px-3">Zia Fit</th>
+                        <th className="py-3 px-3">Classification</th>
+                        <th className="py-3 px-3">Matched Skills</th>
+                        <th className="py-3 px-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60 font-medium">
+                      {rankings.map(cand => {
+                        const initials = cand.candidate_name
+                          ? cand.candidate_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                          : 'CP';
+                        const isSelected = selectedCandidate?.match_id === cand.match_id;
+                        return (
+                          <tr
+                            key={cand.match_id}
+                            onClick={() => setSelectedCandidate(cand)}
+                            className={`cursor-pointer transition-colors ${
+                              isSelected
+                                ? 'bg-indigo-950/40 border-l-2 border-indigo-500'
+                                : 'hover:bg-slate-800/40'
+                            }`}
+                          >
+                            <td className="py-3.5 px-3 font-extrabold text-slate-400">#{cand.rank}</td>
+                            <td className="py-3.5 px-3">
+                              <div className="flex items-center space-x-2.5">
+                                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-[11px] shadow-sm flex-shrink-0">
+                                  {initials}
+                                </div>
+                                <div className="min-w-0">
+                                  <span className="font-semibold text-white block truncate max-w-[130px]">{cand.candidate_name}</span>
+                                  <span className="text-[10px] text-slate-400 truncate block max-w-[130px]">{cand.total_experience_years} Yrs Exp</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-3">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${
+                                cand.match_score >= 80
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                  : cand.match_score >= 60
+                                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                              }`}>
+                                {cand.match_score}%
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                cand.classification === 'shortlist'
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                  : cand.classification === 'maybe'
+                                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                              }`}>
+                                {cand.classification}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-3">
+                              <div className="flex flex-wrap gap-1 max-w-[180px]">
+                                {cand.matched_skills.slice(0, 2).map((s, si) => (
+                                  <span key={si} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                    {s}
+                                  </span>
+                                ))}
+                                {cand.matched_skills.length > 2 && (
+                                  <span className="text-[10px] text-slate-500">+{cand.matched_skills.length - 2}</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-3 text-right">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedCandidate(cand);
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition-colors"
+                              >
+                                Evidence ↗
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Right 4 Columns: Natasha • AI Recruiter Assist Drawer */}
+            <div className="lg:col-span-4 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl flex flex-col h-[620px] overflow-hidden">
+              
+              {/* Drawer Header */}
+              <div className="p-4 border-b border-slate-800 bg-gradient-to-r from-indigo-950/60 to-purple-950/40 flex items-center justify-between">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/30">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-white">Natasha • AI Recruiter Assist</h3>
+                    <p className="text-[10px] text-emerald-400 font-medium">● Connected to Requisition Pool</p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo-950 text-indigo-300 border border-indigo-800">
+                  Groq LLM
+                </span>
+              </div>
+
+              {/* Dynamic Candidate Inspector Card */}
+              {selectedCandidate ? (
+                <div className="p-3.5 bg-slate-950/80 border-b border-slate-800 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Selected Candidate</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      selectedCandidate.match_score >= 80 ? 'bg-emerald-950 text-emerald-300' : 'bg-amber-950 text-amber-300'
+                    }`}>
+                      {selectedCandidate.match_score}% Fit
+                    </span>
+                  </div>
+                  <div className="font-bold text-white text-sm">{selectedCandidate.candidate_name}</div>
+                  <p className="text-[11px] text-slate-400 leading-snug line-clamp-2">
+                    {selectedCandidate.ranking_explanation || 'Evaluated against job competencies and skill coverage.'}
+                  </p>
+                  <div className="pt-1 flex gap-2">
+                    <button
+                      onClick={() => setChatInput(`Draft a personalized outreach email for ${selectedCandidate.candidate_name} based on their ${selectedCandidate.matched_skills[0] || 'experience'}`)}
+                      className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold"
+                    >
+                      ✉️ Draft Invite Email
+                    </button>
+                    <span className="text-slate-600">•</span>
+                    <button
+                      onClick={() => setChatInput(`Why was ${selectedCandidate.candidate_name} classified as ${selectedCandidate.classification}?`)}
+                      className="text-[10px] text-slate-400 hover:text-slate-300 font-semibold"
+                    >
+                      Why {selectedCandidate.classification}?
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 bg-slate-950/40 border-b border-slate-800 text-[11px] text-slate-400 text-center">
+                  Click any candidate row on the left to inspect their dossier.
+                </div>
+              )}
+
+              {/* Assistant Message Feed */}
+              <div className="flex-1 p-3.5 overflow-y-auto space-y-3 custom-scrollbar text-xs">
+                {chatMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                  >
+                    <div
+                      className={`max-w-[90%] p-3 rounded-xl text-xs leading-relaxed ${
+                        msg.role === 'user'
+                          ? 'bg-emerald-600 text-white rounded-br-none shadow-sm'
+                          : 'bg-slate-800/90 text-slate-200 rounded-bl-none border border-slate-700/60'
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap text-[11px]">{msg.content}</p>
+                      {msg.sources && msg.sources.length > 0 && (
+                        <div className="mt-2 pt-1.5 border-t border-slate-700/60 flex flex-wrap gap-1">
+                          {msg.sources.map((src, si) => (
+                            <span key={si} className="text-[9px] px-1.5 py-0.2 rounded bg-slate-900 text-slate-400 font-mono">
+                              {src}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {isChatLoading && (
+                  <div className="flex items-center space-x-2 text-xs text-indigo-400 p-2">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Natasha analyzing pool...</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Action Prompt Chips */}
+              <div className="p-2 border-t border-slate-800/80 bg-slate-950/40 flex flex-wrap gap-1">
+                {[
+                  "✉️ Draft reachout email",
+                  "⚖️ Compare top 2 candidates",
+                  "🔍 Find Python & PostgreSQL experts"
+                ].map((prompt, pi) => (
+                  <button
+                    key={pi}
+                    type="button"
+                    onClick={() => setChatInput(prompt.replace(/^[^\w]+/, ''))}
+                    className="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 hover:border-indigo-500/60 text-slate-400 hover:text-indigo-300 text-[10px] font-medium transition-all"
+                  >
+                    {prompt}
                   </button>
                 ))}
               </div>
+
+              {/* Chat Input Box */}
+              <div className="p-2.5 border-t border-slate-800 bg-slate-900 flex gap-1.5">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleRecruiterChat()}
+                  placeholder="Ask Natasha anything about these candidates..."
+                  className="flex-1 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                />
+                <button
+                  onClick={handleRecruiterChat}
+                  disabled={isChatLoading || !chatInput.trim()}
+                  className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors flex items-center justify-center shadow-sm"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
             </div>
 
-            <div className="flex items-center space-x-3 text-xs text-slate-400">
-              <span>Total Screened: <b className="text-white">{rankings.length}</b></span>
-              <button
-                onClick={() => selectedJobId && loadRankings(selectedJobId, filterClassification)}
-                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-              </button>
+          </div>
+
+        </div>
+      )}
+
+      {/* TAB 2: Hiring Blueprint (Zoho Multi-Stage Kanban Pipeline) */}
+      {activeTab === 'blueprint' && (
+        <div className="space-y-6">
+          <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                Zoho Blueprint Pipeline
+              </span>
+              <h2 className="text-xl font-bold text-white mt-1">Multi-Stage Candidate Progression</h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Visual Kanban stages matching candidate records to hiring checkpoints.
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-slate-400">Total in Requisition:</span>
+              <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold text-xs border border-emerald-500/20">
+                {rankings.length} Applicants
+              </span>
             </div>
           </div>
 
-          {/* Rankings Table */}
-          {isLoadingRankings ? (
-            <div className="text-center py-16 text-xs text-slate-500">Loading candidate matrix...</div>
-          ) : rankings.length === 0 ? (
-            <div className="text-center py-16 px-4 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/30">
-              <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-slate-200">No Candidates Screened Yet</h3>
-              <p className="text-slate-400 text-xs max-w-md mx-auto mt-1 mb-4">
-                Upload candidate resumes via the Batch Screener to generate weighted rankings and evidence-based fit analysis.
-              </p>
-              <button
-                onClick={() => setActiveTab('batch')}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
-              >
-                Go to Batch Screener
-              </button>
+          {/* 4-Stage Kanban Pipeline */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            
+            {/* Stage 1: Applied & Screened */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                  <span className="text-xs font-bold text-white">1. Screened</span>
+                </div>
+                <span className="text-xs font-bold px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">
+                  {rankings.filter(c => c.classification === 'maybe').length}
+                </span>
+              </div>
+              <div className="space-y-2 overflow-y-auto max-h-[480px]">
+                {rankings.filter(c => c.classification === 'maybe').map(cand => (
+                  <div key={cand.match_id} className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-xs space-y-1">
+                    <div className="font-bold text-white">{cand.candidate_name}</div>
+                    <div className="text-[10px] text-slate-400">{cand.total_experience_years} Yrs Exp • {cand.match_score}% Score</div>
+                    <div className="text-[10px] text-amber-400">Under Review</div>
+                  </div>
+                ))}
+                {rankings.filter(c => c.classification === 'maybe').length === 0 && (
+                  <div className="text-center py-6 text-slate-600 text-xs">No candidates in this stage</div>
+                )}
+              </div>
             </div>
-          ) : (
-            <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-xl">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-950 text-slate-400 text-[11px] uppercase tracking-wider font-semibold border-b border-slate-800">
-                  <tr>
-                    <th className="py-3.5 px-4">Rank</th>
-                    <th className="py-3.5 px-4">Candidate Profile</th>
-                    <th className="py-3.5 px-4">Zia Match Score</th>
-                    <th className="py-3.5 px-4">Classification</th>
-                    <th className="py-3.5 px-4">Matched Core Skills</th>
-                    <th className="py-3.5 px-4">Experience</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {rankings.map(cand => {
-                    const initials = cand.candidate_name
-                      ? cand.candidate_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
-                      : 'CP';
-                    return (
-                      <tr key={cand.match_id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-4 px-4 font-extrabold text-slate-400">#{cand.rank}</td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-sm flex-shrink-0">
-                              {initials}
-                            </div>
-                            <div>
-                              <span className="font-semibold text-white block">{cand.candidate_name}</span>
-                              <span className="text-[11px] text-slate-400">{cand.candidate_email}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="font-bold text-white text-sm sm:text-base">{cand.match_score}%</span>
-                            <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                              <div
-                                className={`h-full ${
-                                  cand.match_score >= 80 ? 'bg-emerald-500' : cand.match_score >= 60 ? 'bg-amber-500' : 'bg-rose-500'
-                                }`}
-                                style={{ width: `${cand.match_score}%` }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                            cand.classification === 'shortlist'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : cand.classification === 'maybe'
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                          }`}>
-                            {cand.classification}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex flex-wrap gap-1 max-w-[220px]">
-                            {cand.matched_skills.slice(0, 3).map((s, si) => (
-                              <span key={si} className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                                {s}
-                              </span>
-                            ))}
-                            {cand.matched_skills.length > 3 && (
-                              <span className="text-[10px] text-slate-500">+{cand.matched_skills.length - 3}</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 text-slate-300 font-medium">{cand.total_experience_years} Yrs</td>
-                        <td className="py-4 px-4 text-right">
-                          <button
-                            onClick={() => setSelectedCandidate(cand)}
-                            className="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition-colors"
-                          >
-                            View Evidence
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+
+            {/* Stage 2: Zia Shortlisted */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                  <span className="text-xs font-bold text-white">2. Zia Shortlisted</span>
+                </div>
+                <span className="text-xs font-bold px-1.5 py-0.5 bg-blue-950 text-blue-300 rounded">
+                  {rankings.filter(c => c.classification === 'shortlist').length}
+                </span>
+              </div>
+              <div className="space-y-2 overflow-y-auto max-h-[480px]">
+                {rankings.filter(c => c.classification === 'shortlist').map(cand => (
+                  <div key={cand.match_id} className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-xs space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-white">{cand.candidate_name}</span>
+                      <span className="text-[10px] font-bold text-emerald-400">{cand.match_score}%</span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">{cand.matched_skills.slice(0, 2).join(', ')}</div>
+                    <div className="text-[10px] text-blue-400 font-semibold">Ready for Interview Invite</div>
+                  </div>
+                ))}
+                {rankings.filter(c => c.classification === 'shortlist').length === 0 && (
+                  <div className="text-center py-6 text-slate-600 text-xs">No shortlisted candidates</div>
+                )}
+              </div>
             </div>
-          )}
+
+            {/* Stage 3: Interview Scheduled */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                  <span className="text-xs font-bold text-white">3. Interview Scheduled</span>
+                </div>
+                <span className="text-xs font-bold px-1.5 py-0.5 bg-indigo-950 text-indigo-300 rounded">
+                  {slots.filter(s => s.status === 'booked').length}
+                </span>
+              </div>
+              <div className="space-y-2 overflow-y-auto max-h-[480px]">
+                {slots.filter(s => s.status === 'booked').map(slot => (
+                  <div key={slot.id} className="p-3 bg-indigo-950/30 rounded-xl border border-indigo-800/60 text-xs space-y-1">
+                    <div className="font-bold text-indigo-200">Interview Slot Booked</div>
+                    <div className="text-[10px] text-slate-300">
+                      {new Date(slot.start_time).toLocaleDateString()} at {new Date(slot.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div className="text-[10px] text-emerald-400 font-medium">Candidate Confirmed</div>
+                  </div>
+                ))}
+                {slots.filter(s => s.status === 'booked').length === 0 && (
+                  <div className="text-center py-6 text-slate-600 text-xs">No interviews booked yet</div>
+                )}
+              </div>
+            </div>
+
+            {/* Stage 4: Available Interview Slots */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span className="text-xs font-bold text-white">4. Open Slots</span>
+                </div>
+                <span className="text-xs font-bold px-1.5 py-0.5 bg-emerald-950 text-emerald-300 rounded">
+                  {slots.filter(s => s.status === 'available').length}
+                </span>
+              </div>
+              <div className="space-y-2 overflow-y-auto max-h-[480px]">
+                {slots.filter(s => s.status === 'available').map(slot => (
+                  <div key={slot.id} className="p-3 bg-emerald-950/20 rounded-xl border border-emerald-800/40 text-xs space-y-1">
+                    <div className="font-bold text-emerald-200">Available Calendar Slot</div>
+                    <div className="text-[10px] text-slate-300">
+                      {new Date(slot.start_time).toLocaleDateString()} at {new Date(slot.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div className="text-[10px] text-slate-400">Open for candidate booking</div>
+                  </div>
+                ))}
+                {slots.filter(s => s.status === 'available').length === 0 && (
+                  <div className="text-center py-6 text-slate-600 text-xs">No open slots created</div>
+                )}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
           {/* Evidence Deep Dive Modal */}
           {selectedCandidate && (
@@ -573,9 +860,6 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
               </div>
             </div>
           )}
-
-        </div>
-      )}
 
       {/* TAB 2: Batch Resume Screener */}
       {activeTab === 'batch' && (
