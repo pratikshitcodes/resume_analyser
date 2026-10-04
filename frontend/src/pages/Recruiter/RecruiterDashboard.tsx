@@ -336,6 +336,41 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
       {activeTab === 'rankings' && (
         <div className="space-y-6">
           
+          {/* Zoho-Inspired Quick KPI Metrics Ribbon */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Total Screened</span>
+              <div className="text-2xl font-bold text-white mt-1">{rankings.length}</div>
+              <span className="text-[10px] text-slate-500">Evaluated Resumes</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Zia Top Matches</span>
+              <div className="text-2xl font-bold text-emerald-400 mt-1">
+                {rankings.filter(c => c.match_score >= 80).length}
+              </div>
+              <span className="text-[10px] text-emerald-500/80 font-medium">≥ 80% Fit Index</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Shortlisted</span>
+              <div className="text-2xl font-bold text-indigo-400 mt-1">
+                {rankings.filter(c => c.classification === 'shortlist').length}
+              </div>
+              <span className="text-[10px] text-indigo-400/80 font-medium">Ready for Round 1</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 shadow-sm">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Average Fit Index</span>
+              <div className="text-2xl font-bold text-slate-200 mt-1">
+                {rankings.length > 0
+                  ? (rankings.reduce((acc, c) => acc + c.match_score, 0) / rankings.length).toFixed(1)
+                  : '0'}%
+              </div>
+              <span className="text-[10px] text-slate-500">Bias-Free Model</span>
+            </div>
+          </div>
+
           {/* Controls & Filter Pills */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800">
             <div className="flex items-center space-x-2">
@@ -397,8 +432,8 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
                 <thead className="bg-slate-950 text-slate-400 text-[11px] uppercase tracking-wider font-semibold border-b border-slate-800">
                   <tr>
                     <th className="py-3.5 px-4">Rank</th>
-                    <th className="py-3.5 px-4">Candidate</th>
-                    <th className="py-3.5 px-4">Match Score</th>
+                    <th className="py-3.5 px-4">Candidate Profile</th>
+                    <th className="py-3.5 px-4">Zia Match Score</th>
                     <th className="py-3.5 px-4">Classification</th>
                     <th className="py-3.5 px-4">Matched Core Skills</th>
                     <th className="py-3.5 px-4">Experience</th>
@@ -406,60 +441,72 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
-                  {rankings.map(cand => (
-                    <tr key={cand.match_id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-4 px-4 font-extrabold text-slate-300">#{cand.rank}</td>
-                      <td className="py-4 px-4">
-                        <span className="font-semibold text-white block">{cand.candidate_name}</span>
-                        <span className="text-xs text-slate-500">{cand.candidate_email}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-bold text-white text-base">{cand.match_score}%</span>
-                          <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full ${
-                                cand.match_score >= 80 ? 'bg-emerald-500' : cand.match_score >= 60 ? 'bg-amber-500' : 'bg-rose-500'
-                              }`}
-                              style={{ width: `${cand.match_score}%` }}
-                            />
+                  {rankings.map(cand => {
+                    const initials = cand.candidate_name
+                      ? cand.candidate_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+                      : 'CP';
+                    return (
+                      <tr key={cand.match_id} className="hover:bg-slate-800/40 transition-colors">
+                        <td className="py-4 px-4 font-extrabold text-slate-400">#{cand.rank}</td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-sm flex-shrink-0">
+                              {initials}
+                            </div>
+                            <div>
+                              <span className="font-semibold text-white block">{cand.candidate_name}</span>
+                              <span className="text-[11px] text-slate-400">{cand.candidate_email}</span>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                          cand.classification === 'shortlist'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : cand.classification === 'maybe'
-                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                            : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                        }`}>
-                          {cand.classification}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex flex-wrap gap-1 max-w-[220px]">
-                          {cand.matched_skills.slice(0, 3).map((s, si) => (
-                            <span key={si} className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                              {s}
-                            </span>
-                          ))}
-                          {cand.matched_skills.length > 3 && (
-                            <span className="text-[10px] text-slate-500">+{cand.matched_skills.length - 3}</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-slate-300 font-medium">{cand.total_experience_years} Yrs</td>
-                      <td className="py-4 px-4 text-right">
-                        <button
-                          onClick={() => setSelectedCandidate(cand)}
-                          className="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition-colors"
-                        >
-                          View Evidence
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-bold text-white text-sm sm:text-base">{cand.match_score}%</span>
+                            <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full ${
+                                  cand.match_score >= 80 ? 'bg-emerald-500' : cand.match_score >= 60 ? 'bg-amber-500' : 'bg-rose-500'
+                                }`}
+                                style={{ width: `${cand.match_score}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                            cand.classification === 'shortlist'
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : cand.classification === 'maybe'
+                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          }`}>
+                            {cand.classification}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex flex-wrap gap-1 max-w-[220px]">
+                            {cand.matched_skills.slice(0, 3).map((s, si) => (
+                              <span key={si} className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                {s}
+                              </span>
+                            ))}
+                            {cand.matched_skills.length > 3 && (
+                              <span className="text-[10px] text-slate-500">+{cand.matched_skills.length - 3}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-slate-300 font-medium">{cand.total_experience_years} Yrs</td>
+                        <td className="py-4 px-4 text-right">
+                          <button
+                            onClick={() => setSelectedCandidate(cand)}
+                            className="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition-colors"
+                          >
+                            View Evidence
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -674,7 +721,26 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-800 mt-2 flex gap-2">
+          {/* Zoho-Inspired Quick Action Prompt Chips */}
+          <div className="pt-2 flex flex-wrap gap-1.5">
+            {[
+              "✉️ Draft reachout email for top candidate",
+              "⚖️ Compare top 2 candidates by backend experience",
+              "🔍 Find candidates with 3+ years in Python & PostgreSQL",
+              "⚡ Who has production experience with Docker & Kubernetes?"
+            ].map((prompt, pi) => (
+              <button
+                key={pi}
+                type="button"
+                onClick={() => setChatInput(prompt.replace(/^[^\w]+/, ''))}
+                className="px-2.5 py-1 rounded-full bg-slate-900 border border-slate-700/80 hover:border-emerald-500/60 text-slate-300 hover:text-emerald-300 text-[11px] font-medium transition-all"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+
+          <div className="pt-3 border-t border-slate-800 mt-2 flex gap-2">
             <input
               type="text"
               value={chatInput}

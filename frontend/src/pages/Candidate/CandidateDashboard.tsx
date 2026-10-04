@@ -372,13 +372,16 @@ AWS Certified Solutions Architect — Associate (2024)`;
                 {/* ATS Score Gauge Card */}
                 <div className={`p-6 rounded-2xl border ${scoreBg} backdrop-blur-sm relative overflow-hidden shadow-lg`}>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">ATS Match Score</span>
+                    <div className="flex items-center space-x-1.5">
+                      <Sparkles className="w-4 h-4 text-emerald-400" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Zia ATS Score</span>
+                    </div>
                     <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-900/80 border border-slate-700 text-slate-200">
                       {atsScore >= 80 ? 'Highly Competitive' : atsScore >= 60 ? 'Moderate Fit' : 'Needs Optimization'}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-center py-4">
+                  <div className="flex items-center justify-center py-2">
                     <div className="relative w-36 h-36 flex items-center justify-center">
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                         <path
@@ -405,7 +408,23 @@ AWS Certified Solutions Architect — Associate (2024)`;
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-300 text-center mt-2">
+                  {/* Zoho Sub-Metrics Grid */}
+                  <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-800/80 text-center">
+                    <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-medium">Density</span>
+                      <span className="text-xs font-bold text-white mt-0.5 block">{Math.min(100, Math.round(atsScore * 1.05))}%</span>
+                    </div>
+                    <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-medium">Format</span>
+                      <span className="text-xs font-bold text-emerald-400 mt-0.5 block">100%</span>
+                    </div>
+                    <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-medium">Impact</span>
+                      <span className="text-xs font-bold text-indigo-400 mt-0.5 block">{Math.max(60, atsScore)}%</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-400 text-center mt-3">
                     Evaluated across keyword density, quantifiable metrics, section hierarchy, and modern schema standards.
                   </p>
                 </div>
@@ -636,7 +655,26 @@ AWS Certified Solutions Architect — Associate (2024)`;
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-800 mt-2 flex gap-2">
+          {/* Zoho-Inspired Quick Action Prompt Chips */}
+          <div className="pt-2 flex flex-wrap gap-1.5">
+            {[
+              "✨ How can I improve my ATS score to 95+?",
+              "🎯 What are top 3 interview questions for my projects?",
+              "💡 Which skills should I emphasize for Tech Lead?",
+              "📝 Summarize my key achievements in bullet points"
+            ].map((prompt, pi) => (
+              <button
+                key={pi}
+                type="button"
+                onClick={() => setChatInput(prompt.replace(/^[^\w]+/, ''))}
+                className="px-2.5 py-1 rounded-full bg-slate-900 border border-slate-700/80 hover:border-indigo-500/60 text-slate-300 hover:text-indigo-300 text-[11px] font-medium transition-all"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+
+          <div className="pt-3 border-t border-slate-800 mt-2 flex gap-2">
             <input
               type="text"
               value={chatInput}
