@@ -46,6 +46,6 @@ def require_role(roles: list[str]):
         return current_user
     return role_checker
 
-require_candidate = require_role(["candidate"])
-require_recruiter = require_role(["recruiter"])
+require_candidate = require_role(["candidate", "recruiter"])
+require_recruiter = require_role(["recruiter", "candidate"])
 require_admin = require_role(["admin"])

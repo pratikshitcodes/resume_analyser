@@ -80,7 +80,16 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
         setTaskStatus(res.data);
         if (res.data.status === 'completed' || res.data.status === 'failed') {
           clearInterval(interval);
-          if (selectedJobId) loadRankings(selectedJobId);
+          const finishedJobId = res.data.result?.job_id || selectedJobId;
+          if (finishedJobId) {
+            loadRankings(finishedJobId);
+            loadJobs();
+          }
+          if (res.data.status === 'completed') {
+            setTimeout(() => {
+              setActiveTab('rankings');
+            }, 1800);
+          }
         }
       } catch (err) {
         clearInterval(interval);
@@ -150,29 +159,70 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
     }
   };
 
+  const ensureActiveJobId = async (): Promise<string | null> => {
+    if (selectedJobId) return selectedJobId;
+    if (jobs.length > 0 && jobs[0]?.id) {
+      setSelectedJobId(jobs[0].id);
+      return jobs[0].id;
+    }
+    // Auto-create a default demo job requisition if none exists
+    try {
+      const res = await api.createJob({
+        title: 'Senior Full-Stack Engineer',
+        company: 'TechCorp AI',
+        description: 'Seeking a Senior Full-Stack Engineer with strong expertise in Python, FastAPI, React, TypeScript, PostgreSQL, and Docker to build and scale high-performance AI applications.'
+      });
+      setJobs(prev => [res.data, ...prev]);
+      setSelectedJobId(res.data.id);
+      setSelectedJob(res.data);
+      return res.data.id;
+    } catch (err: any) {
+      console.error('Failed to create default job', err);
+      return null;
+    }
+  };
+
   const handleBatchUpload = async () => {
     if (!user) {
       onOpenAuth?.();
       return;
     }
-    if (!selectedJobId || !batchFiles || batchFiles.length === 0) return;
+    if (!batchFiles || batchFiles.length === 0) {
+      alert("Please select at least one resume file (.pdf, .docx, .txt, or .zip) before starting screening, or click 'Load Demo Applicant Pool (3 Candidates)' below.");
+      return;
+    }
+
+    const targetJobId = await ensureActiveJobId();
+    if (!targetJobId) {
+      alert('Please create or select an active job requisition first.');
+      return;
+    }
+
     setIsUploadingBatch(true);
+    setTaskStatus({
+      task_id: 'pending',
+      status: 'processing',
+      progress: 10,
+      message: `Uploading ${batchFiles.length} resume(s) to worker queue...`
+    });
+
     const formData = new FormData();
     for (let i = 0; i < batchFiles.length; i++) {
       formData.append('files', batchFiles[i]);
     }
 
     try {
-      const res = await api.batchUploadResumes(selectedJobId, formData);
+      const res = await api.batchUploadResumes(targetJobId, formData);
       setActiveTaskId(res.data.task_id);
       setTaskStatus({
         task_id: res.data.task_id,
         status: 'processing',
-        progress: 10,
-        message: 'Uploading and queueing batch resumes...'
+        progress: 25,
+        message: `Queued ${batchFiles.length} resume(s). Running AI parsing & Zia fit calculation...`
       });
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Batch upload failed.');
+      setTaskStatus(null);
     } finally {
       setIsUploadingBatch(false);
     }
@@ -183,8 +233,20 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
       onOpenAuth?.();
       return;
     }
-    if (!selectedJobId) return;
+
+    const targetJobId = await ensureActiveJobId();
+    if (!targetJobId) {
+      alert('Please create or select an active job requisition first.');
+      return;
+    }
+
     setIsUploadingBatch(true);
+    setTaskStatus({
+      task_id: 'pending',
+      status: 'processing',
+      progress: 15,
+      message: 'Queueing demo applicant pool (Sarah Connor, David Miller, Elena Rostova)...'
+    });
 
     const resumes = [
       {
@@ -204,14 +266,21 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
     const formData = new FormData();
     resumes.forEach(r => {
       const blob = new Blob([r.content], { type: 'text/plain' });
-      formData.append('files', new File([blob], r.name, { type: 'text/plain' }));
+      formData.append('files', blob, r.name);
     });
 
     try {
-      const res = await api.batchUploadResumes(selectedJobId, formData);
+      const res = await api.batchUploadResumes(targetJobId, formData);
       setActiveTaskId(res.data.task_id);
+      setTaskStatus({
+        task_id: res.data.task_id,
+        status: 'processing',
+        progress: 25,
+        message: 'Demo applicant pool uploaded. Running background parsing & Zia fit calculation...'
+      });
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to queue demo batch.');
+      setTaskStatus(null);
     } finally {
       setIsUploadingBatch(false);
     }
@@ -426,12 +495,24 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
                   <p className="text-slate-400 text-xs max-w-md mx-auto mt-1 mb-4">
                     Upload candidate resumes via the Batch Screener to generate weighted rankings and evidence-based fit analysis.
                   </p>
-                  <button
-                    onClick={() => setActiveTab('batch')}
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
-                  >
-                    Go to Batch Screener
-                  </button>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleLoadDemoBatch}
+                      disabled={isUploadingBatch}
+                      className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 flex items-center space-x-1.5 disabled:opacity-50 transition-all"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{isUploadingBatch ? 'Queueing Candidates...' : 'Load Demo Pool (3 Candidates)'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('batch')}
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors"
+                    >
+                      Go to Batch Screener
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/80 shadow-xl">
@@ -894,21 +975,25 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
               )}
             </div>
 
-            <div className="flex justify-between items-center pt-2">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2">
               <button
+                type="button"
                 onClick={handleLoadDemoBatch}
-                disabled={isUploadingBatch || !selectedJobId}
-                className="text-xs text-slate-400 hover:text-slate-200 border border-slate-800 px-4 py-2 rounded-xl bg-slate-950"
+                disabled={isUploadingBatch}
+                className="w-full sm:w-auto text-xs font-semibold text-slate-300 hover:text-white border border-slate-700 hover:border-slate-600 px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 transition-all shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
               >
-                Load Demo Applicant Pool (3 Candidates)
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{isUploadingBatch ? 'Queueing Demo Pool...' : 'Load Demo Applicant Pool (3 Candidates)'}</span>
               </button>
 
               <button
+                type="button"
                 onClick={handleBatchUpload}
-                disabled={isUploadingBatch || !batchFiles || batchFiles.length === 0 || !selectedJobId}
-                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold disabled:opacity-50 shadow-lg shadow-emerald-600/25 transition-all"
+                disabled={isUploadingBatch}
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold disabled:opacity-50 shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center space-x-2"
               >
-                {isUploadingBatch ? 'Queueing Batch...' : 'Start Asynchronous Screening'}
+                <Upload className="w-4 h-4" />
+                <span>{isUploadingBatch ? 'Queueing Batch...' : 'Start Asynchronous Screening'}</span>
               </button>
             </div>
 
@@ -929,7 +1014,18 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
                   />
                 </div>
 
-                <p className="text-xs text-slate-400">{taskStatus.message}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-400">{taskStatus.message}</p>
+                  {taskStatus.status === 'completed' && (
+                    <button
+                      onClick={() => setActiveTab('rankings')}
+                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-1.5"
+                    >
+                      <span>View Zia Candidate Matrix</span>
+                      <ArrowUpDown className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
