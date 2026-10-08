@@ -498,13 +498,13 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
                             </td>
                             <td className="py-3.5 px-3">
                               <div className="flex flex-wrap gap-1 max-w-[180px]">
-                                {cand.matched_skills.slice(0, 2).map((s, si) => (
+                                {(cand.matched_skills || []).slice(0, 2).map((s, si) => (
                                   <span key={si} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
                                     {s}
                                   </span>
                                 ))}
-                                {cand.matched_skills.length > 2 && (
-                                  <span className="text-[10px] text-slate-500">+{cand.matched_skills.length - 2}</span>
+                                {(cand.matched_skills || []).length > 2 && (
+                                  <span className="text-[10px] text-slate-500">+{(cand.matched_skills || []).length - 2}</span>
                                 )}
                               </div>
                             </td>
@@ -564,7 +564,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
                   </p>
                   <div className="pt-1 flex gap-2">
                     <button
-                      onClick={() => setChatInput(`Draft a personalized outreach email for ${selectedCandidate.candidate_name} based on their ${selectedCandidate.matched_skills[0] || 'experience'}`)}
+                      onClick={() => setChatInput(`Draft a personalized outreach email for ${selectedCandidate.candidate_name} based on their ${(selectedCandidate.matched_skills && selectedCandidate.matched_skills[0]) || 'experience'}`)}
                       className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold"
                     >
                       ✉️ Draft Invite Email
@@ -730,7 +730,7 @@ export const RecruiterDashboard: React.FC<RecruiterDashboardProps> = ({ onOpenAu
                       <span className="font-bold text-white">{cand.candidate_name}</span>
                       <span className="text-[10px] font-bold text-emerald-400">{cand.match_score}%</span>
                     </div>
-                    <div className="text-[10px] text-slate-400">{cand.matched_skills.slice(0, 2).join(', ')}</div>
+                    <div className="text-[10px] text-slate-400">{(cand.matched_skills || []).slice(0, 2).join(', ') || 'General Profile'}</div>
                     <div className="text-[10px] text-blue-400 font-semibold">Ready for Interview Invite</div>
                   </div>
                 ))}
